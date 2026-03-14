@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import CommandPalette from "./CommandPalette";
 import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Fragment } from "react";
@@ -15,6 +16,8 @@ import {
   CreditCardIcon,
   ChatBubbleLeftRightIcon,
   DocumentDuplicateIcon,
+  QrCodeIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 // Note: In a real app we would extract this navigation array to a shared constant file
@@ -23,6 +26,8 @@ const navigation = [
   { name: "Scolarité", href: "/dashboard/scolarite", icon: AcademicCapIcon },
   { name: "Élèves & Parents", href: "/dashboard/utilisateurs", icon: UsersIcon },
   { name: "Finances", href: "/dashboard/finances", icon: CreditCardIcon },
+  { name: "Discipline", href: "/dashboard/discipline", icon: ShieldCheckIcon },
+  { name: "Pointage", href: "/dashboard/attendance", icon: QrCodeIcon },
   { name: "Fichiers", href: "/dashboard/fichiers", icon: DocumentDuplicateIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
 ];
@@ -131,6 +136,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="px-4 sm:px-6 lg:px-8">
               {children}
             </div>
+            <CommandPalette />
           </main>
         </div>
       </div>

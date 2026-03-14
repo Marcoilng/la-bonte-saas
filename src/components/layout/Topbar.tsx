@@ -1,6 +1,6 @@
 "use client";
 
-import { Bars3Icon, BellIcon } from "@heroicons/react/24/outline";
+import { Bars3Icon, BellIcon, MoonIcon } from "@heroicons/react/24/outline";
 
 export default function Topbar({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   return (
@@ -17,8 +17,24 @@ export default function Topbar({ onOpenSidebar }: { onOpenSidebar: () => void })
       {/* Separator */}
       <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
+      <div className="flex-1 flex items-center lg:px-0">
+          <button 
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+            className="hidden md:flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-slate-400 hover:bg-slate-100 transition-all w-full max-w-sm group"
+          >
+            <Bars3Icon className="h-5 w-5 group-hover:text-blue-500 transition-colors" />
+            <span className="text-sm font-medium">Recherche rapide...</span>
+            <kbd className="ml-auto bg-white border border-slate-200 rounded px-1.5 text-[10px] font-black text-slate-300">CTRL K</kbd>
+          </button>
+      </div>
+
       <div className="flex flex-1 justify-end gap-x-4 self-stretch lg:gap-x-6">
         <div className="flex items-center gap-x-4 lg:gap-x-6">
+          <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-blue-500 transition-colors">
+            <span className="sr-only">Toggle Dark Mode</span>
+            <MoonIcon className="h-6 w-6" aria-hidden="true" />
+          </button>
+          
           <button type="button" className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
             <span className="sr-only">Voir les notifications</span>
             <BellIcon className="h-6 w-6" aria-hidden="true" />

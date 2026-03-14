@@ -9,6 +9,8 @@ import {
   CreditCardIcon,
   ChatBubbleLeftRightIcon,
   DocumentDuplicateIcon,
+  ShieldCheckIcon,
+  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 
 const navigation = [
@@ -16,6 +18,8 @@ const navigation = [
   { name: "Scolarité", href: "/dashboard/scolarite", icon: AcademicCapIcon },
   { name: "Élèves & Parents", href: "/dashboard/utilisateurs", icon: UsersIcon },
   { name: "Finances", href: "/dashboard/finances", icon: CreditCardIcon },
+  { name: "Discipline", href: "/dashboard/discipline", icon: ShieldCheckIcon },
+  { name: "Pointage", href: "/dashboard/attendance", icon: QrCodeIcon },
   { name: "Fichiers", href: "/dashboard/fichiers", icon: DocumentDuplicateIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
 ];
