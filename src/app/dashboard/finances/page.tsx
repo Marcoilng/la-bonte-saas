@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CashEntryForm from "@/components/finances/CashEntryForm";
 import ReceiptPreview from "@/components/finances/ReceiptPreview";
+import { getTransactions } from "@/lib/services";
 import { 
   CurrencyDollarIcon, 
   ArrowUpIcon, 
@@ -15,15 +16,41 @@ import {
 export default function FinancesPage() {
   const [showReceipt, setShowReceipt] = useState<any>(null);
   const [isClosed, setIsClosed] = useState(false);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Mock notifications simulation
   const [notification, setNotification] = useState<string | null>(null);
+
+  const fetchHistory = async () => {
+    try {
+      const data = await getTransactions();
+      setTransactions(data);
+    } catch (error) {
+      console.error("Failed to fetch history:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
 
   const handlePaymentSuccess = (paymentData: any) => {
     setShowReceipt(paymentData);
     setNotification(`Notification Parent: Reçu de ${paymentData.amount}${paymentData.currency} confirmé.`);
     setTimeout(() => setNotification(null), 5000);
+    fetchHistory(); // Refresh history
   };
+
+  const totalUSD = transactions
+    .filter(tx => tx.currency === "USD")
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
+
+  const totalCDF = transactions
+    .filter(tx => tx.currency === "CDF")
+    .reduce((acc, curr) => acc + Number(curr.amount), 0);
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
@@ -47,7 +74,9 @@ export default function FinancesPage() {
             )}
         </div>
         <div className="flex items-center gap-4">
-            <p className="text-xs font-medium text-slate-400">Samedi 14 Mars 2026</p>
+            <p className="text-xs font-medium text-slate-400">
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
         </div>
       </div>
 
@@ -81,30 +110,33 @@ export default function FinancesPage() {
             <div className="glass rounded-[2rem] border border-white/20 shadow-xl overflow-hidden">
                 <div className="p-8 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 className="text-lg font-black text-slate-800">Recettes du Jour</h3>
-                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Traçabilité complète</p>
+                        <h3 className="text-lg font-black text-slate-800">Recettes Récentes</h3>
+                        <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Traçabilité complète Supabase</p>
                     </div>
                     <button className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
                         <DocumentTextIcon className="h-6 w-6 text-slate-400" />
                     </button>
                 </div>
                 <div className="divide-y divide-slate-50">
-                    {[
-                        { student: "JEAN MUBIALA", category: "Minerval", amount: "150 $", time: "10:45", status: "Validé" },
-                        { student: "SARAH KAVIRA", category: "Uniforme", amount: "45 $", time: "09:12", status: "Validé" },
-                    ].map((tx, i) => (
-                        <div key={i} className="p-6 flex items-center justify-between hover:bg-white/40 transition-colors">
+                    {loading ? (
+                       <div className="p-6 text-center text-gray-400 font-bold">Chargement de l'historique...</div>
+                    ) : transactions.length === 0 ? (
+                       <div className="p-6 text-center text-gray-400 font-bold">Aucune transaction trouvée.</div>
+                    ) : transactions.map((tx, i) => (
+                        <div key={tx.id} className="p-6 flex items-center justify-between hover:bg-white/40 transition-colors">
                             <div className="flex items-center gap-4">
                                 <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-black text-xs">
-                                    {tx.student.charAt(0)}
+                                    {(tx.students?.nom || "U").charAt(0)}
                                 </div>
                                 <div>
-                                    <p className="text-sm font-black text-slate-800">{tx.student}</p>
-                                    <p className="text-[10px] font-bold text-slate-400 uppercase">{tx.category} • {tx.time}</p>
+                                    <p className="text-sm font-black text-slate-800">{tx.students?.prenom} {tx.students?.nom}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase">
+                                      {tx.category} • {new Date(tx.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm font-black text-slate-800">{tx.amount}</p>
+                                <p className="text-sm font-black text-slate-800">{tx.amount} {tx.currency}</p>
                                 <span className="text-[9px] font-black text-green-600 uppercase bg-green-50 px-2 py-0.5 rounded-full">{tx.status}</span>
                             </div>
                         </div>
@@ -120,11 +152,11 @@ export default function FinancesPage() {
                 <div className="space-y-4">
                     <div className="flex justify-between items-end">
                         <span className="text-xs font-bold text-slate-500">Total USD</span>
-                        <span className="text-2xl font-black text-slate-900">1,240 $</span>
+                        <span className="text-2xl font-black text-slate-900">{totalUSD.toLocaleString()} $</span>
                     </div>
                     <div className="flex justify-between items-end">
                         <span className="text-xs font-bold text-slate-500">Total CDF</span>
-                        <span className="text-xl font-black text-slate-900">320,000 FC</span>
+                        <span className="text-xl font-black text-slate-900">{totalCDF.toLocaleString()} FC</span>
                     </div>
                 </div>
                 <div className="pt-6 border-t border-slate-100">

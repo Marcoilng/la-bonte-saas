@@ -14,15 +14,19 @@ import {
 } from "@heroicons/react/24/outline";
 
 const navigation = [
-  { name: "Tableau de Bord", href: "/dashboard", icon: HomeIcon },
-  { name: "Scolarité", href: "/dashboard/scolarite", icon: AcademicCapIcon },
-  { name: "Élèves & Parents", href: "/dashboard/utilisateurs", icon: UsersIcon },
-  { name: "Finances", href: "/dashboard/finances", icon: CreditCardIcon },
-  { name: "Discipline", href: "/dashboard/discipline", icon: ShieldCheckIcon },
-  { name: "Pointage", href: "/dashboard/attendance", icon: QrCodeIcon },
-  { name: "Fichiers", href: "/dashboard/fichiers", icon: DocumentDuplicateIcon },
-  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
+  { name: "Tableau de Bord", href: "/dashboard", icon: HomeIcon, roles: ["Admin", "Teacher", "Student"] },
+  { name: "Scolarité", href: "/dashboard/scolarite", icon: AcademicCapIcon, roles: ["Admin", "Teacher"] },
+  { name: "Élèves & Parents", href: "/dashboard/utilisateurs", icon: UsersIcon, roles: ["Admin"] },
+  { name: "Finances", href: "/dashboard/finances", icon: CreditCardIcon, roles: ["Admin"] },
+  { name: "Discipline", href: "/dashboard/discipline", icon: ShieldCheckIcon, roles: ["Admin", "Teacher"] },
+  { name: "Pointage", href: "/dashboard/attendance", icon: QrCodeIcon, roles: ["Admin", "Teacher"] },
+  { name: "Fichiers", href: "/dashboard/fichiers", icon: DocumentDuplicateIcon, roles: ["Admin", "Teacher", "Student"] },
+  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon, roles: ["Admin", "Teacher", "Student"] },
 ];
+
+const currentUser = {
+  role: "Admin" // Mocking the current user role
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -42,7 +46,9 @@ export default function Sidebar() {
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {navigation.map((item) => {
+                {navigation
+                  .filter(item => item.roles.includes(currentUser.role))
+                  .map((item) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   return (
                     <li key={item.name}>

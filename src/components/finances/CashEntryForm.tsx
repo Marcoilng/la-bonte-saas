@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { recordPayment } from "@/lib/services";
 import { 
   CurrencyDollarIcon, 
   UserIcon, 
@@ -11,11 +12,12 @@ import {
 
 export default function CashEntryForm({ onPaymentSuccess }: { onPaymentSuccess: (data: any) => void }) {
   const [formData, setFormData] = useState({
-    studentId: "",
+    student_id: "",
     amount: "",
     currency: "USD",
     category: "Minerval",
   });
+  const [submitting, setSubmitting] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,12 +25,27 @@ export default function CashEntryForm({ onPaymentSuccess }: { onPaymentSuccess: 
     setIsConfirming(true);
   };
 
-  const confirmPayment = () => {
-    // Audit log simulation
-    console.log(`Audit: Payment recorded for ${formData.studentId} - ${formData.amount}${formData.currency}`);
-    onPaymentSuccess({ ...formData, id: `REC-${Date.now()}`, date: new Date().toISOString() });
-    setIsConfirming(false);
-    setFormData({ studentId: "", amount: "", currency: "USD", category: "Minerval" });
+  const confirmPayment = async () => {
+    setSubmitting(true);
+    try {
+      const result = await recordPayment({
+        student_id: formData.student_id,
+        amount: Number(formData.amount),
+        currency: formData.currency,
+        category: formData.category,
+        status: "Validé"
+      });
+
+      if (result) {
+        onPaymentSuccess({ ...result, id: result.id, date: result.created_at });
+        setFormData({ student_id: "", amount: "", currency: "USD", category: "Minerval" });
+      }
+    } catch (error) {
+      alert("Erreur lors de l'enregistrement du paiement.");
+    } finally {
+      setSubmitting(false);
+      setIsConfirming(false);
+    }
   };
 
   return (
@@ -54,8 +71,8 @@ export default function CashEntryForm({ onPaymentSuccess }: { onPaymentSuccess: 
                 type="text" 
                 placeholder="Ex: LB-2024-0012"
                 className="w-full bg-slate-50/50 border-0 rounded-2xl py-4 pl-12 pr-4 text-sm focus:ring-2 focus:ring-blue-600 transition-all font-medium"
-                value={formData.studentId}
-                onChange={(e) => setFormData({...formData, studentId: e.target.value})}
+                value={formData.student_id}
+                onChange={(e) => setFormData({...formData, student_id: e.target.value})}
               />
             </div>
           </div>
@@ -118,7 +135,7 @@ export default function CashEntryForm({ onPaymentSuccess }: { onPaymentSuccess: 
           <div className="bg-slate-50 rounded-2xl p-6 text-left mb-8 border border-slate-100">
              <div className="flex justify-between mb-2">
                 <span className="text-xs font-bold text-slate-400 uppercase">Élève</span>
-                <span className="text-sm font-black text-slate-800">{formData.studentId}</span>
+                <span className="text-sm font-black text-slate-800">{formData.student_id}</span>
              </div>
              <div className="flex justify-between mb-2">
                 <span className="text-xs font-bold text-slate-400 uppercase">Montant</span>
@@ -132,15 +149,17 @@ export default function CashEntryForm({ onPaymentSuccess }: { onPaymentSuccess: 
           <div className="flex gap-3">
             <button 
               onClick={() => setIsConfirming(false)}
-              className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all"
+              disabled={submitting}
+              className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all disabled:opacity-50"
             >
               Annuler
             </button>
             <button 
               onClick={confirmPayment}
-              className="flex-3 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all"
+              disabled={submitting}
+              className="flex-3 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all disabled:opacity-50"
             >
-              Confirmer & Imprimer Reçu
+              {submitting ? "Traitement..." : "Confirmer & Imprimer Reçu"}
             </button>
           </div>
         </div>
